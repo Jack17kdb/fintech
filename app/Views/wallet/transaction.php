@@ -1,81 +1,146 @@
-<?= view('layouts/header', ['title' => 'Transaction Details - FINEX']) ?>
+<?= view('layouts/header', ['title' => 'Transaction Receipt - FINEX']) ?>
 
 <div class="container">
     <div class="card">
-        <div class="logo-section">
-            <div class="logo-bg"></div>
-            <div class="finex-logo">FINEX</div>
-            <div class="currency-icons">
-                <div class="currency-icon icon-1">€</div>
-                <div class="currency-icon icon-2">¥</div>
-            </div>
-        </div>
 
-        <h1 class="card-title">Transaction Successful</h1>
+        <?php
+            $isCredit = $entry_type === 'credit';
+            $sign     = $isCredit ? '+' : '-';
+            $color    = $isCredit ? '#2F855A' : '#C53030';
 
-        <div class="alert alert-success">
-            Your transaction has been completed successfully!
-        </div>
+            $label = match($transaction['type']) {
+                'wallet_deposit'    => 'Deposit',
+                'wallet_transfer'   => $isCredit ? 'Money Received' : 'Money Sent',
+                'wallet_withdrawal' => 'Withdrawal',
+                default             => ucwords(str_replace('_', ' ', $transaction['type']))
+            };
+        ?>
 
         <style>
-            .detail-row {
-                display: flex;
-                justify-content: space-between;
-                padding: 14px 0;
-                border-bottom: 1px solid #E2E8F0;
+            .receipt-header {
+                background: linear-gradient(135deg, #4F7FFF 0%, #5B8EFF 100%);
+                margin: -40px -35px 28px;
+                padding: 28px 35px;
+                border-radius: 24px 24px 0 0;
+                text-align: center;
+                color: white;
             }
-            .detail-row:last-child {
-                border-bottom: none;
+            .receipt-header .brand {
+                font-size: 13px;
+                font-weight: 700;
+                opacity: 0.85;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 6px;
             }
-            .detail-label {
-                color: #718096;
-                font-size: 14px;
+            .receipt-header .receipt-type {
+                font-size: 15px;
+                opacity: 0.9;
                 font-weight: 500;
             }
-            .detail-value {
+            .receipt-message {
+                background: #F7FAFC;
+                border: 1px solid #E2E8F0;
+                border-radius: 12px;
+                padding: 20px;
+                font-size: 15px;
+                line-height: 1.85;
+                color: #2D3748;
+                margin-bottom: 24px;
+            }
+            .receipt-message .highlight {
+                font-weight: 700;
                 color: #1a202c;
-                font-size: 14px;
-                font-weight: 600;
+            }
+            .receipt-message .amount {
+                font-weight: 700;
+                color: <?= $color ?>;
+            }
+            .receipt-ref {
+                text-align: center;
+                font-size: 11px;
+                color: #A0AEC0;
+                font-family: monospace;
+                margin-top: 16px;
+                letter-spacing: 0.05em;
             }
         </style>
 
-        <div style="margin: 24px 0;">
-            <div class="detail-row">
-                <span class="detail-label">Reference</span>
-                <span class="detail-value"><?= esc($transaction['reference']) ?></span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Amount</span>
-                <span class="detail-value">$<?= number_format($transaction['amount'], 2) ?></span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Fee</span>
-                <span class="detail-value">$<?= number_format($fee ?? $transaction['fee_amount'] ?? 0, 2) ?></span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Total</span>
-                <span class="detail-value">$<?= number_format($transaction['amount'] + $fee ?? $transaction['fee_amount'] ?? 0, 2) ?></span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Status</span>
-                <span class="detail-value" style="color: #2F855A;"><?= esc($transaction['status']) ?></span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Date</span>
-                <span class="detail-value">
-                    <?= date('M d, Y h:i A', strtotime($transaction['created_at'])) ?>
-                </span>
+        <div class="receipt-header">
+            <div class="brand">◉ FINEX</div>
+            <div class="receipt-type"><?= $label ?> Confirmation</div>
+        </div>
+
+        <div class="receipt-message">
+            <?php if($transaction['type'] === 'wallet_deposit'): ?>
+
+                <span class="highlight"><?= esc($owner['name']) ?></span>,
+                your FINEX wallet has been credited with
+                <span class="amount">KSH <?= number_format($transaction['amount'], 2) ?></span>
+                on <span class="highlight"><?= date('d/m/Y', strtotime($transaction['created_at'])) ?></span>
+                at <span class="highlight"><?= date('h:i A', strtotime($transaction['created_at'])) ?></span>.
+                Your account <span class="highlight">(<?= esc($owner['email']) ?>)</span>
+                has been funded successfully.
+                Transaction cost <span class="highlight">KSH 0.00</span>.
+
+            <?php elseif($transaction['type'] === 'wallet_withdrawal'): ?>
+
+                <span class="highlight"><?= esc($owner['name']) ?></span>,
+                <span class="amount">KSH <?= number_format($transaction['amount'], 2) ?></span>
+                has been withdrawn from your FINEX wallet on
+                <span class="highlight"><?= date('d/m/Y', strtotime($transaction['created_at'])) ?></span>
+                at <span class="highlight"><?= date('h:i A', strtotime($transaction['created_at'])) ?></span>.
+                Transaction cost
+                <span class="highlight">KSH <?= number_format($transaction['fee_amount'], 2) ?></span>.
+                Total deducted
+                <span class="amount">KSH <?= number_format($entry_amount, 2) ?></span>.
+
+            <?php elseif($transaction['type'] === 'wallet_transfer' && !$isCredit): ?>
+
+                <span class="highlight"><?= esc($owner['name']) ?></span>,
+                you have sent
+                <span class="amount">KSH <?= number_format($transaction['amount'], 2) ?></span>
+                to <span class="highlight"><?= $other_party ? esc($other_party['name']) : 'recipient' ?></span>
+                <?php if($other_party): ?>
+                    (<span class="highlight"><?= esc($other_party['email']) ?></span>)
+                <?php endif; ?>
+                on <span class="highlight"><?= date('d/m/Y', strtotime($transaction['created_at'])) ?></span>
+                at <span class="highlight"><?= date('h:i A', strtotime($transaction['created_at'])) ?></span>.
+                Transaction cost
+                <span class="highlight">KSH <?= number_format($transaction['fee_amount'], 2) ?></span>.
+                Total deducted from your account
+                <span class="amount">KSH <?= number_format($entry_amount, 2) ?></span>.
+
+            <?php elseif($transaction['type'] === 'wallet_transfer' && $isCredit): ?>
+
+                <span class="highlight"><?= esc($owner['name']) ?></span>,
+                you have received
+                <span class="amount">KSH <?= number_format($transaction['amount'], 2) ?></span>
+                from <span class="highlight"><?= $other_party ? esc($other_party['name']) : 'sender' ?></span>
+                <?php if($other_party): ?>
+                    (<span class="highlight"><?= esc($other_party['email']) ?></span>)
+                <?php endif; ?>
+                on <span class="highlight"><?= date('d/m/Y', strtotime($transaction['created_at'])) ?></span>
+                at <span class="highlight"><?= date('h:i A', strtotime($transaction['created_at'])) ?></span>.
+                Your FINEX wallet has been credited
+                <span class="amount">KSH <?= number_format($entry_amount, 2) ?></span>.
+
+            <?php endif; ?>
+
+            <div class="receipt-ref">
+                Ref: <?= esc($transaction['reference']) ?>
             </div>
         </div>
 
-        <div style="display: grid; gap: 12px;">
+        <div style="display: grid; gap: 10px;">
+            <a href="<?= base_url('wallet/transactions') ?>" style="text-decoration: none;">
+                <button class="btn btn-primary">Back to History</button>
+            </a>
             <a href="<?= base_url('wallet') ?>" style="text-decoration: none;">
                 <button class="btn btn-primary">Back to Dashboard</button>
             </a>
-            <a href="<?= base_url('wallet/transactions') ?>" style="text-decoration: none;">
-                <button class="btn btn-primary">View All Transactions</button>
-            </a>
         </div>
+
     </div>
 </div>
 

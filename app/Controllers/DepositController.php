@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\DepositModel;
+use App\Models\UserModel;
 use App\Models\AccountModel;
 use App\Models\TransactionModel;
 use App\Models\LedgerModel;
@@ -14,8 +15,10 @@ class DepositController extends BaseController{
 	protected $transactionModel;
 	protected $ledgerModel;
 	protected $pricingService;
+	protected $userModel;
 
 	public function __construct(){
+		$this->userModel = new UserModel();
 		$this->depositModel = new DepositModel();
 		$this->accountModel = new AccountModel();
 		$this->transactionModel = new TransactionModel();
@@ -24,7 +27,13 @@ class DepositController extends BaseController{
 	}
 
 	public function depositForm(){
-		return view('wallet/deposit');
+	    $userId  = session()->get('user_id');
+	    $account = $this->accountModel->where('user_id', $userId)->first();
+	    $accountService = new \App\Services\AccountService();
+
+	    return view('wallet/deposit', [
+		'balance' => $accountService->getBalance($account['id'])
+	    ]);
 	}
 
 	public function deposit(){
@@ -44,13 +53,16 @@ class DepositController extends BaseController{
 	        $db = \Config\Database::connect();
 	        $db->transStart();
 
-		$newBalance = $account['balance'] + $amount;
-
-		$this->accountModel->update($account['id'], [
-        	    'balance' => $newBalance
+		$accountService = new \App\Services\AccountService();
+		$currentBalance = $accountService->getBalance($account['id']);
+	        
+	        $newBalance = $currentBalance + $amount;
+	        
+	        $this->accountModel->update($account['id'], [
+	        	'balance' => $newBalance
 	        ]);
 	        
-	        $fee = $this->pricingService->CalculateFee('wallet_withdraw', $amount);
+	        $fee = $this->pricingService->CalculateFee('wallet_deposit', $amount);
 
 	        $transactionId = $this->transactionModel->insert([
     			'reference' => uniqid('TXN'),
@@ -64,9 +76,22 @@ class DepositController extends BaseController{
 	    	$this->ledgerModel->insert([
     			'transaction_id' => $transactionId,
         		'account_id' => $account['id'],
-        		'amount' => $amount,
+        		'amount' => $amount + $fee,
         		'entry_type' => 'credit'
 	    	]);
+	    	
+	    	$platformAccount = $this->accountModel
+		    ->where('account_number', 'PLATFORM_REVENUE')
+		    ->first();
+
+		if($platformAccount){
+		    $this->ledgerModel->insert([
+			'transaction_id' => $transactionId,
+			'account_id'     => $platformAccount['id'],
+			'amount'         => $fee,
+			'entry_type'     => 'credit'
+		    ]);
+		}
 
 	    	$db->transComplete();
 
@@ -76,9 +101,15 @@ class DepositController extends BaseController{
 
 	    	$transaction = $this->transactionModel->find($transactionId);
 
+		$owner = $this->userModel->find($userId);
+
 		return view('wallet/transaction', [
-        	    'transaction' => $transaction,
-                    'fee' => $transaction['fee_amount']
-	        ]);
+		    'transaction'  => $transaction,
+		    'fee'          => $transaction['fee_amount'],
+		    'entry_type'   => 'credit',
+		    'entry_amount' => $amount,
+		    'owner'        => $owner,
+		    'label'        => 'Deposit'
+		]);
 	}
 }

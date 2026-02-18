@@ -21,62 +21,87 @@
 
         <h1 class="card-title">Transaction History</h1>
 
-        <?php if (!empty($transactions)): ?>
-            <style>
-                .transaction-list {
-                    margin-top: 20px;
-                }
-                .transaction-item {
-                    padding: 16px;
-                    border: 1px solid #E2E8F0;
-                    border-radius: 10px;
-                    margin-bottom: 12px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .transaction-info {
-                    flex: 1;
-                }
-                .transaction-type {
-                    font-weight: 600;
-                    color: #1a202c;
-                    font-size: 14px;
-                    margin-bottom: 4px;
-                }
-                .transaction-date {
-                    font-size: 12px;
-                    color: #718096;
-                }
-                .transaction-amount {
-                    font-weight: 700;
-                    font-size: 16px;
-                }
-                .amount-credit {
-                    color: #2F855A;
-                }
-                .amount-debit {
-                    color: #C53030;
-                }
-                .pagination {
-                    margin-top: 20px;
-                    text-align: center;
-                }
-            </style>
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="alert alert-danger">
+                <?= session()->getFlashdata('error') ?>
+            </div>
+        <?php endif; ?>
 
+        <style>
+            .transaction-list {
+                margin-top: 8px;
+            }
+            .transaction-item {
+                padding: 14px 16px;
+                border: 1px solid #E2E8F0;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-decoration: none;
+                transition: background 0.2s;
+            }
+            .transaction-item:hover {
+                background: #F7FAFC;
+            }
+            .transaction-info {
+                flex: 1;
+            }
+            .transaction-type {
+                font-weight: 600;
+                color: #1a202c;
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+            .transaction-date {
+                font-size: 12px;
+                color: #718096;
+            }
+            .transaction-amount {
+                font-weight: 700;
+                font-size: 16px;
+            }
+            .amount-credit { color: #2F855A; }
+            .amount-debit  { color: #C53030; }
+            .transaction-arrow {
+                color: #CBD5E0;
+                margin-left: 10px;
+                font-size: 18px;
+            }
+            .pagination {
+                margin-top: 20px;
+                text-align: center;
+            }
+        </style>
+
+        <?php if (!empty($transactions)): ?>
             <div class="transaction-list">
-                <?php foreach ($transactions as $transaction): ?>
-                    <div class="transaction-item">
+                <?php foreach ($transactions as $t): ?>
+                    <?php
+                        $isCredit = $t['entry_type'] === 'credit';
+                        $sign     = $isCredit ? '+' : '-';
+                        $class    = $isCredit ? 'amount-credit' : 'amount-debit';
+
+                        $label = match($t['type']) {
+                            'wallet_deposit'    => 'Deposit',
+                            'wallet_transfer'   => $isCredit ? 'Transfer Received' : 'Transfer Sent',
+                            'wallet_withdrawal' => 'Withdrawal',
+                            default             => ucwords(str_replace('_', ' ', $t['type']))
+                        };
+                    ?>
+                    <a href="<?= base_url('wallet/transaction/' . $t['id']) ?>" class="transaction-item">
                         <div class="transaction-info">
-                            <div class="transaction-type"><?= esc($transaction['type']) ?></div>
+                            <div class="transaction-type"><?= $label ?></div>
                             <div class="transaction-date">
-                                <?= date('M d, Y h:i A', strtotime($transaction['created_at'])) ?>
+                                <?= date('M d, Y h:i A', strtotime($t['created_at'])) ?>
                             </div>
                         </div>
-                        <div class="transaction-amount amount-debit">
-                            -$<?= number_format($transaction['amount'], 2) ?>
+                        <div class="transaction-amount <?= $class ?>">
+                            <?= $sign ?>$<?= number_format($t['entry_amount'], 2) ?>
                         </div>
-                    </div>
+                        <span class="transaction-arrow">›</span>
+                    </a>
                 <?php endforeach; ?>
             </div>
 

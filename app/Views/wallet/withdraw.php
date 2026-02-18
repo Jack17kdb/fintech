@@ -21,7 +21,7 @@
 
         <div class="balance-card">
             <div class="balance-label">Current Balance</div>
-            <div class="balance-amount">$<?= number_format($balance ?? 0, 2) ?> USD</div>
+            <div class="balance-amount">$<?= number_format($balance ?? 0, 2) ?> KSH</div>
             <div class="money-icon">💵</div>
         </div>
 

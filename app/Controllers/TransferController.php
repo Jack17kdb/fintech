@@ -26,9 +26,10 @@ class TransferController extends BaseController {
     public function transferForm() {
 	$userId = session()->get('user_id');
 	$account = $this->accountModel->where('user_id', $userId)->first();
+	$accountService = new \App\Services\AccountService();
 
         return view('wallet/transfer', [
-		'balance' => $account['balance']
+		'balance' => $accountService->getBalance($account['id'])
 	]);
     }
 
@@ -58,9 +59,16 @@ class TransferController extends BaseController {
             $transactionId = $this->transferService->transfer($senderAccountId, $receiverAccountId, $amount, $userId);
             $transaction = $this->transactionModel->find($transactionId);
 
+            $owner = $this->userModel->find($userId);
+
             return view('wallet/transaction', [
-                'transaction' => $transaction,
-                'fee' => $transaction['fee_amount']
+                'transaction'  => $transaction,
+                'fee'          => $transaction['fee_amount'],
+                'entry_type'   => 'debit',
+                'entry_amount' => $amount + $transaction['fee_amount'],
+                'owner'        => $owner,
+                'other_party'  => $receiverUser,
+                'label'        => 'Transfer'
             ]);
 
         } catch (\Exception $e) {

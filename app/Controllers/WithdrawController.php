@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\AccountModel;
+use App\Models\UserModel;
 use App\Models\TransactionModel;
 use App\Models\LedgerModel;
 use App\Services\PricingService;
@@ -12,20 +13,24 @@ class WithdrawController extends BaseController{
 	protected $transactionModel;
 	protected $ledgerModel;
 	protected $pricingService;
+	protected $userModel;
 	
 	public function __construct(){
 		$this->accountModel = new AccountModel();
 		$this->transactionModel = new TransactionModel();
 		$this->ledgerModel = new LedgerModel();
 		$this->pricingService = new PricingService();
+		$this->userModel = new UserModel();
 	}
 	
 	public function withdrawForm(){
-		$account = $this->accountModel->where('user_id', session()->get('user_id'));
-	
-		return view('wallet/withdraw', [
-			'balance' => $account['balance']
-		]);
+	    $userId  = session()->get('user_id');
+	    $account = $this->accountModel->where('user_id', $userId)->first();
+	    $accountService = new \App\Services\AccountService();
+
+	    return view('wallet/withdraw', [
+		'balance' => $accountService->getBalance($account['id'])
+	    ]);
 	}
 	
 	public function withdraw(){
@@ -38,27 +43,30 @@ class WithdrawController extends BaseController{
         	    return redirect()->back()->with('error', 'No account found!!');
 	        }
 	        
-	        $db = \Config\Database::connect;
+	        $db = \Config\Database::connect();
 	        
 	        $db->transStart();
 	        
-	        if($amount > $account['balance']){
+	        $accountService = new \App\Services\AccountService();
+		$currentBalance = $accountService->getBalance($account['id']);
+	        
+	        if($amount > $currentBalance){
 	        	return redirect()
 	        		->back()
 	        		->with('error', 'Amount cannot be greater than the account balance');
-	        }
+	        };
 	        
-	        $newBalance = $account['balance'] - $newBalance;
+	        $newBalance = $currentBalance - $amount;
 	        
 	        $this->accountModel->update($account['id'], [
 	        	'balance' => $newBalance
 	        ]);
 	        
-	        $fee = $this->pricingService->CalculateFee('wallet_withdraw', $amount);
+	        $fee = $this->pricingService->CalculateFee('wallet_withdrawal', $amount);
 	        
 	        $transactionId = $this->transactionModel->insert([
     			'reference' => uniqid('TXN'),
-        		'type' => 'wallet_withdraw',
+        		'type' => 'wallet_withdrawal',
         		'amount' => $amount,
         		'fee_amount' => $fee,
         		'status' => 'completed',
@@ -68,9 +76,22 @@ class WithdrawController extends BaseController{
 	    	$this->ledgerModel->insert([
     			'transaction_id' => $transactionId,
         		'account_id' => $account['id'],
-        		'amount' => $amount,
-        		'entry_type' => 'credit'
+        		'amount' => $amount + $fee,
+        		'entry_type' => 'debit'
 	    	]);
+	    	
+	    	$platformAccount = $this->accountModel
+		    ->where('account_number', 'PLATFORM_REVENUE')
+		    ->first();
+
+		if($platformAccount){
+		    $this->ledgerModel->insert([
+			'transaction_id' => $transactionId,
+			'account_id'     => $platformAccount['id'],
+			'amount'         => $fee,
+			'entry_type'     => 'credit'
+		    ]);
+		}
 
 	    	$db->transComplete();
 	    	
@@ -79,10 +100,16 @@ class WithdrawController extends BaseController{
 	        }
 
 	    	$transaction = $this->transactionModel->find($transactionId);
+	    	
+	    	$owner = $this->userModel->find($userId);
 
 		return view('wallet/transaction', [
-        	    'transaction' => $transaction,
-                    'fee' => $transaction['fee_amount']
-	        ]);
+		    'transaction'  => $transaction,
+		    'fee'          => $transaction['fee_amount'],
+		    'entry_type'   => 'debit',
+		    'entry_amount' => $amount + $fee,
+		    'owner'        => $owner,
+		    'label'        => 'Withdrawal'
+		]);
 	}
 }
