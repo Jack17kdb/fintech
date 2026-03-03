@@ -1,30 +1,25 @@
+# Base image with PHP 8.2 and Apache
 FROM php:8.2-apache
 
-# Install required PHP extensions
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    zip \
     unzip \
-    libzip-dev \
-    && docker-php-ext-install \
-    mysqli \
-    pdo \
-    pdo_mysql \
-    zip
+    git \
+    && docker-php-ext-install mysqli pdo pdo_mysql zip intl
 
-# Enable Apache rewrite module
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Change Apache document root to CI4 public folder
+# Set Apache document root to /public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-    /etc/apache2/sites-available/*.conf \
-    /etc/apache2/apache2.conf \
-    /etc/apache2/conf-available/*.conf
+# Copy project files (including vendor)
+COPY . /var/www/html
 
-# Copy project files into container
-COPY . /var/www/html/
-
-# Set correct permissions
+# Set permissions for writable folders
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/writable
 
