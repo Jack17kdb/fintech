@@ -26,13 +26,11 @@ class CreateWalletTable extends Migration
             ],
             'created_at' => [
                 'type' => 'DATETIME',
-                'null' => false,
-                'default' => 'CURRENT_TIMESTAMP'
+		'null' => true
             ],
             'updated_at' => [
                 'type' => 'DATETIME',
-                'null' => false,
-                'default' => 'CURRENT_TIMESTAMP'
+		'null' => true
             ],
         ]);
 

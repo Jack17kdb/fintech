@@ -29,8 +29,7 @@ class CreateLedgerEntries extends Migration
             ],
             'created_at' => [
         	'type' => 'DATETIME',
-        	'null' => false,
-                'default' => 'CURRENT_TIMESTAMP'
+		'null' => true
 	    ],
         ]);
 
