@@ -1,55 +1,152 @@
-<?= view('layouts/header', ['title' => 'Withdraw - FINEX']) ?>
+<?php require_once APPPATH . 'Views/layouts/admin_header.php'; ?>
+<body class="hold-transition sidebar-mini layout-fixed dark-mode">
+<div class="wrapper">
 
-<div class="container">
-    <div class="card">
-        <div class="logo-section">
-            <div class="logo-bg"></div>
-            <div class="finex-logo">FINEX</div>
-            <div class="currency-icons">
-                <div class="currency-icon icon-1">€</div>
-                <div class="currency-icon icon-2">¥</div>
-            </div>
-        </div>
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-dark">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="<?= base_url('logout') ?>">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </nav>
 
-        <div class="nav-tabs">
-            <a href="<?= base_url('wallet') ?>" class="nav-tab">Dashboard</a>
-            <a href="<?= base_url('wallet/deposit') ?>" class="nav-tab">Deposit</a>
-            <a href="<?= base_url('wallet/withdraw') ?>" class="nav-tab active">Withdraw</a>
-            <a href="<?= base_url('wallet/transactions') ?>" class="nav-tab">History</a>
-            <a href="<?= base_url('wallet/profile') ?>" class="nav-tab">Profile</a>
-        </div>
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="<?= base_url('wallet') ?>" class="brand-link">
+            <i class="fas fa-wallet brand-image ml-3"></i>
+            <span class="brand-text font-weight-light">FINEX Wallet</span>
+        </a>
 
-        <div class="balance-card">
-            <div class="balance-label">Current Balance</div>
-            <div class="balance-amount">$<?= number_format($balance ?? 0, 2) ?> KSH</div>
-            <div class="money-icon">💵</div>
-        </div>
-
-        <div class="section-title">Withdraw Funds</div>
-
-        <?php if (session()->getFlashdata('error')): ?>
-            <div class="alert alert-danger">
-                <?= session()->getFlashdata('error') ?>
-            </div>
-        <?php endif; ?>
-
-        <form action="<?= base_url('wallet/withdraw') ?>" method="POST">
-            <?= csrf_field() ?>
-            <div class="form-group">
-                <input 
-                    type="number" 
-                    name="amount" 
-                    class="form-control" 
-                    placeholder="Amount"
-                    step="0.01"
-                    min="0.01"
-                    required
-                >
+        <div class="sidebar">
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="info">
+                    <a href="#" class="d-block"><?= esc(session()->get('user_name') ?? 'User') ?></a>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Withdraw</button>
-        </form>
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-item">
+                        <a href="<?= base_url('wallet') ?>" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('wallet/transactions') ?>" class="nav-link">
+                            <i class="nav-icon fas fa-list"></i>
+                            <p>Transactions</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('wallet/deposit') ?>" class="nav-link">
+                            <i class="nav-icon fas fa-arrow-down"></i>
+                            <p>Deposit</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('wallet/withdraw') ?>" class="nav-link active">
+                            <i class="nav-icon fas fa-arrow-up"></i>
+                            <p>Withdraw</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('wallet/transfer') ?>" class="nav-link">
+                            <i class="nav-icon fas fa-exchange-alt"></i>
+                            <p>Transfer</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('wallet/profile') ?>" class="nav-link">
+                            <i class="nav-icon fas fa-user"></i>
+                            <p>Profile</p>
+                        </a>
+                    </li>
+
+                    <?php if(session()->get('role') == 'admin'): ?>
+                    <li class="nav-header">ADMINISTRATION</li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('admin/users') ?>" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Manage Users</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('admin/feerules') ?>" class="nav-link">
+                            <i class="nav-icon fas fa-dollar-sign"></i>
+                            <p>Fee Rules</p>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Withdraw Funds</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card card-warning">
+                            <div class="card-header">
+                                <h3 class="card-title">Available Balance</h3>
+                            </div>
+                            <div class="card-body">
+                                <h2 class="text-warning">KSH <?= number_format($balance ?? 0, 2) ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">Withdrawal Form</h3>
+                    </div>
+
+                    <?php if (session()->getFlashdata('error')): ?>
+                        <div class="alert alert-danger m-3">
+                            <?= session()->getFlashdata('error') ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form action="<?= base_url('wallet/withdraw') ?>" method="POST">
+                    	<?= csrf_field() ?>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="amount">Amount (KSH)</label>
+                                <input type="number" name="amount" class="form-control" id="amount" placeholder="Enter amount" step="0.01" min="0.01" required>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-warning">Withdraw Now</button>
+                            <a href="<?= base_url('wallet') ?>" class="btn btn-default">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </section>
     </div>
-</div>
 
-<?= view('layouts/footer') ?>
+<?php require_once APPPATH . 'Views/layouts/admin_footer.php'; ?>

@@ -14,8 +14,7 @@ class FeeRuleModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'transaction_type',
-        'min_amount',
-        'max_amount',
+        'location',
         'fixed_fee',
         'percentage_fee'
     ];

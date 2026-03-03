@@ -6,6 +6,9 @@ use App\Controllers\WalletController;
 use App\Controllers\TransferController;
 use App\Controllers\DepositController;
 use App\Controllers\WithdrawController;
+use App\Controllers\ProfileController;
+use App\Controllers\UserController;
+use App\Controllers\PriceController;
 
 /**
  * @var RouteCollection $routes
@@ -22,10 +25,21 @@ $routes->group('', ['filter' => 'auth'], function($routes){
 	$routes->get('/wallet', 'WalletController::dashboard');
 	$routes->get('/wallet/transactions', 'WalletController::transactions');
 	$routes->get('/wallet/transaction/(:num)', 'WalletController::transactionDetail/$1');
+	$routes->get('/wallet/transactions/export-csv', 'WalletController::exportCSV');
+	$routes->get('/wallet/transactions/export-pdf', 'WalletController::exportPDF');
 	$routes->get('/wallet/transfer', 'TransferController::transferForm');
 	$routes->post('/wallet/transfer', 'TransferController::transfer');
 	$routes->get('/wallet/deposit', 'DepositController::depositForm');
 	$routes->post('/wallet/deposit', 'DepositController::deposit');
 	$routes->get('/wallet/withdraw', 'WithdrawController::withdrawForm');
         $routes->post('/wallet/withdraw', 'WithdrawController::withdraw');
+        $routes->get('/wallet/profile', 'ProfileController::ProfileForm');
+        $routes->post('/wallet/profile', 'ProfileController::InfoChange');
+
+        $routes->group('', ['filter' => 'admin'], function($routes){
+        	$routes->get('/admin/users', 'UserController::UserListForm');
+	        $routes->post('/admin/users/(:num)', 'UserController::DeleteUser/$1');
+	        $routes->get('/admin/feerules', 'PriceController::FeeRuleForm');
+	        $routes->post('/admin/feerules', 'PriceController::addFeeRule');
+        });
 });

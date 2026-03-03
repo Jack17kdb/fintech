@@ -17,13 +17,10 @@ class CreateFeeRules extends Migration
                 'type' => 'VARCHAR',
                 'constraint' => 50
             ],
-            'min_amount' => [
-                'type' => 'DECIMAL',
-                'constraint' => '15,2'
-            ],
-            'max_amount' => [
-                'type' => 'DECIMAL',
-                'constraint' => '15,2'
+	    'location' => [
+                'type' => 'VARCHAR',
+                'constraint' => '150',
+		'default' => 'Nairobi'
             ],
             'fixed_fee' => [
                 'type' => 'DECIMAL',
@@ -31,7 +28,8 @@ class CreateFeeRules extends Migration
             ],
             'percentage_fee' => [
                 'type' => 'DECIMAL',
-                'constraint' => '5,2'
+                'constraint' => '5,2',
+		'default' => '0.00',
             ],
         ]);
 
@@ -41,6 +39,6 @@ class CreateFeeRules extends Migration
 
     public function down()
     {
-        $this->forge->dropTable('fee_rules');
+        $this->forge->dropTable('fee_rules', true);
     }
 }

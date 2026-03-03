@@ -66,7 +66,8 @@ class AuthController extends BaseController{
 		session()->set([
 			'user_id' => $user['id'],
 			'user_name' => $user['name'],
-			'is_logged_in' => true
+			'is_logged_in' => true,
+			'role' => $user['role']
 		]);
 
 		return redirect()

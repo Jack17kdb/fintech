@@ -47,7 +47,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?= base_url('wallet/deposit') ?>" class="nav-link active">
+                        <a href="<?= base_url('wallet/deposit') ?>" class="nav-link">
                             <i class="nav-icon fas fa-arrow-down"></i>
                             <p>Deposit</p>
                         </a>
@@ -65,7 +65,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?= base_url('wallet/profile') ?>" class="nav-link">
+                        <a href="<?= base_url('wallet/profile') ?>" class="nav-link active">
                             <i class="nav-icon fas fa-user"></i>
                             <p>Profile</p>
                         </a>
@@ -97,7 +97,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>Deposit Funds</h1>
+                        <h1>My Profile</h1>
                     </div>
                 </div>
             </div>
@@ -108,47 +108,86 @@
                 
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="card card-success">
+                        <div class="card card-primary">
                             <div class="card-header">
-                                <h3 class="card-title">Current Balance</h3>
+                                <h3 class="card-title">Account Information</h3>
                             </div>
                             <div class="card-body">
-                                <h2 class="text-success">KSH <?= number_format($balance ?? 0, 2) ?></h2>
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th width="40%">Full Name</th>
+                                            <td><?= esc($name) ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Email Address</th>
+                                            <td><?= esc($email) ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Location</th>
+                                            <td><?= esc($location ?: 'Not Set') ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Account Status</th>
+                                            <td>
+                                                <?php if($status == 'active'): ?>
+                                                    <span class="badge badge-success">Active</span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-danger">Blocked</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Deposit Form</h3>
-                    </div>
-
-                    <?php if (session()->getFlashdata('error')): ?>
-                        <div class="alert alert-danger m-3">
-                            <?= session()->getFlashdata('error') ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (session()->getFlashdata('success')): ?>
-                        <div class="alert alert-success m-3">
-                            <?= session()->getFlashdata('success') ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <form action="<?= base_url('wallet/deposit') ?>" method="POST">
-                    	<?= csrf_field() ?>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="amount">Amount (KSH)</label>
-                                <input type="number" name="amount" class="form-control" id="amount" placeholder="Enter amount" step="0.01" min="0.01" required>
+                    <div class="col-md-6">
+                        <div class="card card-warning">
+                            <div class="card-header">
+                                <h3 class="card-title">Update Profile</h3>
                             </div>
+
+                            <?php if (session()->getFlashdata('error')): ?>
+                                <div class="alert alert-danger m-3">
+                                    <?= session()->getFlashdata('error') ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (session()->getFlashdata('success')): ?>
+                                <div class="alert alert-success m-3">
+                                    <?= session()->getFlashdata('success') ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (session()->getFlashdata('info')): ?>
+                                <div class="alert alert-info m-3">
+                                    <?= session()->getFlashdata('info') ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <form action="<?= base_url('wallet/profile/update') ?>" method="POST">
+                            	<?= csrf_field() ?>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="location">Location</label>
+                                        <input type="text" name="location" class="form-control" id="location" placeholder="Enter your location" value="<?= esc($location) ?>">
+                                        <small class="form-text text-muted">Used for calculating transaction fees</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password">New Password (Optional)</label>
+                                        <input type="password" name="password" class="form-control" id="password" placeholder="Leave blank to keep current password">
+                                        <small class="form-text text-muted">Minimum 8 characters</small>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-warning">Update Profile</button>
+                                    <a href="<?= base_url('wallet') ?>" class="btn btn-default">Cancel</a>
+                                </div>
+                            </form>
                         </div>
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-success">Deposit Now</button>
-                            <a href="<?= base_url('wallet') ?>" class="btn btn-default">Cancel</a>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
             </div>

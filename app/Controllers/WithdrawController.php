@@ -62,7 +62,9 @@ class WithdrawController extends BaseController{
 	        	'balance' => $newBalance
 	        ]);
 	        
-	        $fee = $this->pricingService->CalculateFee('wallet_withdrawal', $amount);
+	        $user = $this->userModel->find($userId);
+	        
+	        $fee = $this->pricingService->CalculateFee('wallet_deposit', $user['location']);
 	        
 	        $transactionId = $this->transactionModel->insert([
     			'reference' => uniqid('TXN'),

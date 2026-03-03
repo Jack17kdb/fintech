@@ -34,7 +34,8 @@ class CreateUsers extends Migration
             ],
             'created_at' => [
                 'type' => 'DATETIME',
-                'null' => true
+                'null' => false,
+                'default' => 'CURRENT_TIMESTAMP'
             ]
         ]);
 
@@ -44,6 +45,6 @@ class CreateUsers extends Migration
 
     public function down()
     {
-        //
+        $this->forge->dropTable('users', true);
     }
 }

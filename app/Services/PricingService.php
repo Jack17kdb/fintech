@@ -11,20 +11,16 @@ class PricingService{
 		$this->feeRuleModel = new FeeRuleModel();
 	}
 
-	public function CalculateFee($transactionType, $amount){
+	public function CalculateFee($transactionType, $location){
 		$rule = $this->feeRuleModel
 			->where('transaction_type', $transactionType)
-			->where('min_amount <=', $amount)
-			->where('max_amount >=', $amount)
+			->where('location', $location)
 			->first();
 
 		if(!$rule){
-			throw new \Exception("No fee rule configured.");
+			throw new \Exception("No fee rule configured for this location.");
 		}
 
-		$percentage_fee = ($rule['percentage_fee'] / 100) * $amount;
-		$fixed_fee = $rule['fixed_fee'];
-
-		return round($percentage_fee + $fixed_fee, 2);
+		return (float) $rule['fixed_fee'];
 	}
 }

@@ -36,7 +36,8 @@ class CreateTransactions extends Migration
             ],
             'created_at' => [
 	        'type' => 'DATETIME',
-        	'null' => true,
+        	'null' => false,
+                'default' => 'CURRENT_TIMESTAMP'
 	    ],
         ]);
 

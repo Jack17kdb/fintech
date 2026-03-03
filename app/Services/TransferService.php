@@ -24,14 +24,14 @@ class TransferService{
         $this->db = \Config\Database::connect();
     }
 
-    public function transfer($senderAccountId, $receiverAccountId, $amount, $userId){
+    public function transfer($senderAccountId, $receiverAccountId, $location, $amount, $userId){
     	if($senderAccountId == $receiverAccountId){
     		throw new \Exception("Cannot transfer to same account");
     	}
 
     	$accountService = new AccountService();
 
-    	$fee = $this->pricingService->CalculateFee("wallet_transfer", $amount);
+    	$fee = $this->pricingService->CalculateFee("wallet_transfer", $location);
     	$totalDebit = $amount + $fee;
 
     	$senderBalance = $accountService->getBalance($senderAccountId);

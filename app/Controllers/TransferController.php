@@ -56,7 +56,7 @@ class TransferController extends BaseController {
 
         try {
 
-            $transactionId = $this->transferService->transfer($senderAccountId, $receiverAccountId, $amount, $userId);
+            $transactionId = $this->transferService->transfer($senderAccountId, $receiverAccountId, $receiverUser['location'], $amount, $userId);
             $transaction = $this->transactionModel->find($transactionId);
 
             $owner = $this->userModel->find($userId);
