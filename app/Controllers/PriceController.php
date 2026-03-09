@@ -14,9 +14,24 @@ class PriceController extends BaseController{
 	public function FeeRuleForm(){
 		$rules = $this->feeRuleModel->orderBy('id', 'DESC')->paginate(10);
 
+		$kenya_locations = [
+			'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet',
+			'Embu', 'Garissa', 'Homa Bay', 'Isiolo', 'Kajiado',
+			'Kakamega', 'Kericho', 'Kiambu', 'Kilifi', 'Kirinyaga',
+			'Kisii', 'Kisumu', 'Kitui', 'Kwale', 'Laikipia',
+			'Lamu', 'Machakos', 'Makueni', 'Mandera', 'Marsabit',
+			'Meru', 'Migori', 'Mombasa', 'Muranga', 'Nairobi',
+			'Nakuru', 'Nandi', 'Narok', 'Nyamira', 'Nyandarua',
+			'Nyeri', 'Samburu', 'Siaya', 'Taita-Taveta', 'Tana River',
+			'Tharaka-Nithi', 'Trans-Nzoia', 'Turkana', 'Uasin Gishu',
+			'Vihiga', 'Wajir', 'West Pokot'
+		];
+		sort($kenya_locations);
+
 		return view('admin/feerules', [
-			'rules' => $rules,
-			'pager' => $this->feeRuleModel->pager
+			'rules'           => $rules,
+			'pager'           => $this->feeRuleModel->pager,
+			'kenya_locations' => $kenya_locations,
 		]);
 	}
 

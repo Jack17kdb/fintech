@@ -127,6 +127,47 @@
                             	<?= csrf_field() ?>
                                 <div class="card-body">
                                     <div class="form-group">
+                                        <label>Location</label>
+                                        <!-- Hidden real select that holds the value for form submission -->
+                                        <select name="location" id="location" style="display:none;" required>
+                                            <option value=""></option>
+                                            <?php foreach ($kenya_locations as $loc): ?>
+                                                <option value="<?= esc($loc) ?>"><?= esc($loc) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <!-- Custom dropdown trigger -->
+                                        <div id="loc-dropdown" style="position:relative;">
+                                            <div id="loc-trigger" style="
+                                                display:flex; align-items:center; justify-content:space-between;
+                                                padding:8px 12px; background:#343a40; border:1px solid #6c757d;
+                                                border-radius:4px; cursor:pointer; color:#fff; user-select:none;">
+                                                <span id="loc-display">-- Select Location --</span>
+                                                <span id="loc-arrow" style="transition:transform .2s;">&#9660;</span>
+                                            </div>
+                                            <div id="loc-panel" style="
+                                                display:none; position:absolute; z-index:9999; width:100%;
+                                                background:#343a40; border:1px solid #6c757d; border-top:none;
+                                                border-radius:0 0 4px 4px; max-height:260px; flex-direction:column;">
+                                                <div style="padding:8px;">
+                                                    <input type="text" id="loc-search" placeholder="Search location..."
+                                                        style="width:100%; padding:6px 10px; border:1px solid #6c757d;
+                                                               border-radius:4px; background:#495057; color:#fff;"
+                                                        autocomplete="off">
+                                                </div>
+                                                <ul id="loc-list" style="
+                                                    list-style:none; margin:0; padding:0 0 6px 0;
+                                                    overflow-y:auto; max-height:195px;">
+                                                    <?php foreach ($kenya_locations as $loc): ?>
+                                                        <li data-value="<?= esc($loc) ?>" style="
+                                                            padding:8px 14px; color:#fff; cursor:pointer;">
+                                                            <?= esc($loc) ?>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
                                         <label for="transaction_type">Transaction Type</label>
                                         <select name="transaction_type" id="transaction_type" class="form-control" required>
                                             <option value="">-- Select Type --</option>
@@ -134,10 +175,6 @@
                                             <option value="wallet_transfer">Transfer</option>
                                             <option value="wallet_withdrawal">Withdrawal</option>
                                         </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="location">Location</label>
-                                        <input type="text" name="location" class="form-control" id="location" placeholder="e.g., Nairobi, Kenya" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="fixed_fee">Fixed Fee (KSH)</label>
@@ -209,4 +246,64 @@
         </section>
     </div>
 
+
+<script>
+(function() {
+    var trigger  = document.getElementById('loc-trigger');
+    var panel    = document.getElementById('loc-panel');
+    var arrow    = document.getElementById('loc-arrow');
+    var search   = document.getElementById('loc-search');
+    var list     = document.getElementById('loc-list');
+    var display  = document.getElementById('loc-display');
+    var hidden   = document.getElementById('location');
+    var items    = list.querySelectorAll('li');
+    var open     = false;
+
+    // Hover styles
+    items.forEach(function(li) {
+        li.addEventListener('mouseenter', function() { li.style.background = '#495057'; });
+        li.addEventListener('mouseleave', function() { li.style.background = 'transparent'; });
+    });
+
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        open = !open;
+        panel.style.display = open ? 'flex' : 'none';
+        arrow.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+        if (open) { search.focus(); }
+    });
+
+    search.addEventListener('input', function() {
+        var filter = this.value.toLowerCase();
+        items.forEach(function(li) {
+            li.style.display = li.textContent.trim().toLowerCase().indexOf(filter) !== -1 ? '' : 'none';
+        });
+    });
+
+    items.forEach(function(li) {
+        li.addEventListener('click', function() {
+            var val = li.getAttribute('data-value');
+            display.textContent = val;
+            hidden.value = val;
+            open = false;
+            panel.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+            // reset search
+            search.value = '';
+            items.forEach(function(x) { x.style.display = ''; });
+        });
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', function() {
+        if (open) {
+            open = false;
+            panel.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    });
+
+    panel.addEventListener('click', function(e) { e.stopPropagation(); });
+})();
+</script>
 <?php require_once APPPATH . 'Views/layouts/admin_footer.php'; ?>
