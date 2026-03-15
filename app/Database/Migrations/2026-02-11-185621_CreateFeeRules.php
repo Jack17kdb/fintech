@@ -31,6 +31,14 @@ class CreateFeeRules extends Migration
                 'constraint' => '5,2',
 		'default' => '0.00',
             ],
+            'created_at' => [
+                'type' => 'DATETIME',
+		'null' => true
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+		'null' => true
+            ],
         ]);
 
         $this->forge->addKey('id', true);
