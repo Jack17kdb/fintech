@@ -105,6 +105,7 @@ class WalletController extends BaseController{
 	    }
 
 	    $transactions = $builder
+		->groupBy('l.id')
 		->orderBy('l.created_at', 'DESC')
 		->get()
 		->getResultArray();
@@ -175,6 +176,7 @@ class WalletController extends BaseController{
 	    }
 
 	    $transactions = $builder
+		->groupBy('l.id')
 		->orderBy('l.created_at', 'DESC')
 		->get()
 		->getResultArray();
@@ -274,6 +276,7 @@ class WalletController extends BaseController{
 	    }
 
 	    $transactions = $builder
+		->groupBy('l.id')
 		->orderBy('l.created_at', 'DESC')
 		->get()
 		->getResultArray();

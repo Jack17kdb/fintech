@@ -131,7 +131,7 @@
                         <h3 class="card-title"><i class="fas fa-receipt"></i> Transaction Receipt</h3>
                     </div>
                     <div class="card-body">
-                        <table class="table table-bordered">
+                        <div class="table-responsive"><table class="table table-bordered">
                             <tbody>
                                 <tr>
                                     <th width="30%">Transaction Type</th>
@@ -172,7 +172,7 @@
                                     <td><span class="badge badge-success"><?= strtoupper(esc($transaction['status'])) ?></span></td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </table></div>
 
                         <div class="row mt-4 no-print">
                             <div class="col-md-6">

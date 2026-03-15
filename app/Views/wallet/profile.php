@@ -113,7 +113,7 @@
                                 <h3 class="card-title">Account Information</h3>
                             </div>
                             <div class="card-body">
-                                <table class="table table-bordered">
+                                <div class="table-responsive"><table class="table table-bordered">
                                     <tbody>
                                         <tr>
                                             <th width="40%">Full Name</th>
@@ -138,7 +138,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </table></div>
                             </div>
                         </div>
                     </div>

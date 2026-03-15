@@ -195,7 +195,7 @@
                             </div>
                             <div class="card-body">
                                 <?php if (!empty($rules)): ?>
-                                <table class="table table-bordered table-striped">
+                                <div class="table-responsive"><table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -226,7 +226,7 @@
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
-                                </table>
+                                </table></div>
 
                                 <?php if (isset($pager)): ?>
                                     <div class="mt-3">

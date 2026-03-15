@@ -25,11 +25,13 @@ class TransferController extends BaseController {
 
     public function transferForm() {
 	$userId = session()->get('user_id');
+	$users = $this->userModel->findAll();
 	$account = $this->accountModel->where('user_id', $userId)->first();
 	$accountService = new \App\Services\AccountService();
 
         return view('wallet/transfer', [
-		'balance' => $accountService->getBalance($account['id'])
+		'balance' => $accountService->getBalance($account['id']),
+		'users' => $users
 	]);
     }
 
@@ -42,13 +44,13 @@ class TransferController extends BaseController {
         }
 
         $senderAccountId = $account['id'];
-        $receiverEmail = $this->request->getPost('receiverEmail');
+        $receiverName = $this->request->getPost('receiverName');
         $amount = (float)$this->request->getPost('amount');
 
-	$receiverUser = $this->userModel->where('email', $receiverEmail)->first();
+	$receiverUser = $this->userModel->where('name', $receiverName)->first();
 
 	if (!$receiverUser) {
-	    return redirect()->back()->with('error', 'Recipient email not found');
+	    return redirect()->back()->with('error', 'Recipient not found');
 	}
 
 	$receiverAccount = $this->accountModel->where('user_id', $receiverUser['id'])->first();

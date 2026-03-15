@@ -170,7 +170,7 @@
                     </div>
                     <div class="card-body">
                         <?php if (!empty($transactions)): ?>
-                        <table id="transactionTable" class="table table-bordered table-striped">
+                        <div class="table-responsive"><table id="transactionTable" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -215,7 +215,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
-                        </table>
+                        </table></div>
                         <?php else: ?>
                             <div class="alert alert-info">No transactions found for the selected filters.</div>
                         <?php endif; ?>

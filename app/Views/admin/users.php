@@ -122,7 +122,7 @@
                         <?php endif; ?>
 
                         <?php if (!empty($users)): ?>
-                        <table id="usersTable" class="table table-bordered table-striped">
+                        <div class="table-responsive"><table id="usersTable" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -157,7 +157,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
-                        </table>
+                        </table></div>
 
                         <?php if (isset($pager)): ?>
                             <div class="mt-3">

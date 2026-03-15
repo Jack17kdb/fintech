@@ -138,8 +138,48 @@
                                 <input type="number" name="amount" class="form-control" id="amount" placeholder="Enter amount" step="0.01" min="0.01" required>
                             </div>
                             <div class="form-group">
-                                <label for="receiverEmail">Recipient Email</label>
-                                <input type="email" name="receiverEmail" class="form-control" id="receiverEmail" placeholder="Enter recipient email address" required>
+                                <label>Recipient</label>
+                                <!-- Hidden select submitted with form -->
+                                <select name="receiverName" id="receiverName" style="display:none;" required>
+                                    <option value=""></option>
+                                    <?php
+                                    $currentUserId = session()->get('user_id');
+                                    foreach ($users as $u):
+                                        if ($u['id'] == $currentUserId) continue;
+                                    ?>
+                                        <option value="<?= esc($u['name']) ?>"><?= esc($u['name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <!-- Custom dropdown trigger -->
+                                <div id="tr-user-dropdown" style="position:relative;">
+                                    <div id="tr-user-trigger" style="
+                                        display:flex; align-items:center; justify-content:space-between;
+                                        padding:8px 12px; background:#343a40; border:1px solid #6c757d;
+                                        border-radius:4px; cursor:pointer; color:#adb5bd; user-select:none; min-height:38px;">
+                                        <span id="tr-user-display">-- Select Recipient --</span>
+                                        <span id="tr-user-arrow" style="transition:transform .2s;">&#9660;</span>
+                                    </div>
+                                    <div id="tr-user-panel" style="
+                                        display:none; position:absolute; z-index:9999; width:100%;
+                                        background:#343a40; border:1px solid #6c757d; border-top:none;
+                                        border-radius:0 0 4px 4px; max-height:260px; flex-direction:column;">
+                                        <div style="padding:8px;">
+                                            <input type="text" id="tr-user-search" placeholder="Search username..."
+                                                style="width:100%; padding:6px 10px; border:1px solid #6c757d;
+                                                       border-radius:4px; background:#495057; color:#fff; outline:none;"
+                                                autocomplete="off">
+                                        </div>
+                                        <ul id="tr-user-list" style="
+                                            list-style:none; margin:0; padding:0 0 6px 0;
+                                            overflow-y:auto; max-height:195px;">
+                                            <?php foreach ($users as $u): if ($u['id'] == $currentUserId) continue; ?>
+                                                <li data-value="<?= esc($u['name']) ?>" style="padding:8px 14px; color:#fff; cursor:pointer;">
+                                                    <?= esc($u['name']) ?>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="card-footer">
@@ -155,4 +195,61 @@
 
 
 
+<script>
+(function() {
+    var trigger = document.getElementById('tr-user-trigger');
+    var panel   = document.getElementById('tr-user-panel');
+    var arrow   = document.getElementById('tr-user-arrow');
+    var search  = document.getElementById('tr-user-search');
+    var list    = document.getElementById('tr-user-list');
+    var display = document.getElementById('tr-user-display');
+    var hidden  = document.getElementById('receiverName');
+    var items   = list.querySelectorAll('li');
+    var open    = false;
+
+    items.forEach(function(li) {
+        li.addEventListener('mouseenter', function() { li.style.background = '#495057'; });
+        li.addEventListener('mouseleave', function() { li.style.background = 'transparent'; });
+    });
+
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        open = !open;
+        panel.style.display = open ? 'flex' : 'none';
+        arrow.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+        if (open) { search.focus(); }
+    });
+
+    search.addEventListener('input', function() {
+        var filter = this.value.toLowerCase();
+        items.forEach(function(li) {
+            li.style.display = li.textContent.trim().toLowerCase().indexOf(filter) !== -1 ? '' : 'none';
+        });
+    });
+
+    items.forEach(function(li) {
+        li.addEventListener('click', function() {
+            var val = li.getAttribute('data-value');
+            display.textContent = val;
+            display.style.color = '#fff';
+            hidden.value = val;
+            open = false;
+            panel.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+            search.value = '';
+            items.forEach(function(x) { x.style.display = ''; });
+        });
+    });
+
+    document.addEventListener('click', function() {
+        if (open) {
+            open = false;
+            panel.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    });
+
+    panel.addEventListener('click', function(e) { e.stopPropagation(); });
+})();
+</script>
 <?php require_once APPPATH . 'Views/layouts/admin_footer.php'; ?>
