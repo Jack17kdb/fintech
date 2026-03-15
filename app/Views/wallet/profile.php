@@ -167,7 +167,7 @@
                                 </div>
                             <?php endif; ?>
 
-                            <form action="<?= base_url('wallet/profile/update') ?>" method="POST">
+                            <form action="<?= base_url('wallet/profile') ?>" method="POST">
                             	<?= csrf_field() ?>
                                 <div class="card-body">
                                     <div class="form-group">
