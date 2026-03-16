@@ -175,6 +175,7 @@
                                             <?php foreach ($users as $u): if ($u['id'] == $currentUserId) continue; ?>
                                                 <li data-value="<?= esc($u['name']) ?>" style="padding:8px 14px; color:#fff; cursor:pointer;">
                                                     <?= esc($u['name']) ?>
+                                                    <small style="color:#adb5bd; margin-left:6px;">(<?= esc($u['location'] ?? 'Unknown') ?>)</small>
                                                 </li>
                                             <?php endforeach; ?>
                                         </ul>
@@ -230,7 +231,9 @@
     items.forEach(function(li) {
         li.addEventListener('click', function() {
             var val = li.getAttribute('data-value');
-            display.textContent = val;
+            var small = li.querySelector('small');
+            var loc = small ? ' ' + small.textContent.trim() : '';
+            display.textContent = val + loc;
             display.style.color = '#fff';
             hidden.value = val;
             open = false;
